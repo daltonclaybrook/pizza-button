@@ -58,18 +58,21 @@ exports.handler = (event, context, callback) => {
         if (priceResult.success) {
             // success
             addPaymentToOrder(order);
-            // order.place((placeResult) => {
-            //     console.log(`order result:\n${JSON.stringify(placeResult, null, 2)}`);
-            //     if (placeResult.success) {
-            //         // success
-            //         callback(null, placeResult);
-            //     } else {
-            //         // error
-            //         callback('an error occurred when placing the order');
-            //     }
-            // });
-            sendMessage('Everything seems to be going well');
-            callback(null, priceResult);
+            order.place((placeResult) => {
+                console.log(`order result:\n${JSON.stringify(placeResult, null, 2)}`);
+                if (placeResult.success) {
+                    // success
+                    const amount = placeResult.result.Order.Amounts.Customer;
+                    var message = (amount) ? `You have been charged: $${amount}. ` : '';
+                    message = message + 'Track your order here: https://www.dominos.com/en/pages/tracker/#/track/order/';
+                    sendMessage(message);
+                    callback(null, placeResult);
+                } else {
+                    // error
+                    sendMessage('Something went wrong while attempting to order the pizza.');
+                    callback(placeResult);
+                }
+            });
         } else {
             // error
             sendMessage('Your pizza could not be ordered because pricing failed.');
