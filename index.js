@@ -42,6 +42,12 @@ exports.handler = (event, context, callback) => {
         return callback("missing some environment variables");
     }
 
+    const clickType = event.clickType;
+    if (clickType != 'LONG') {
+        sendMessage('Hold the button for about two seconds to order a pizza.');
+        return callback(null, `button click type: ${clickType}. Use LONG to order a pizza.`);
+    } 
+
     const customer = createCustomer();
     var order = createOrder(customer);
     addItemsToOrder(order);
