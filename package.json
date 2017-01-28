@@ -1,0 +1,15 @@
+{
+  "name": "pizza-button",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "export STORE_ID=6936 && export CUSTOMER_ID=ilXude3jOcOSzOtosseDzFGU4yI4-FN0xCGa2bDm && export COUPON_CODE=9193 && node test.js"
+  },
+  "author": "Dalton Claybrook",
+  "license": "MIT",
+  "dependencies": {
+    "dominos": "^2.1.1",
+    "twilio": "^2.11.1"
+  }
+}

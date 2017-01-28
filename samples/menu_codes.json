@@ -1,0 +1,9 @@
+
+> pizza-button@1.0.0 test /Users/daltonclaybrook/Documents/Personal/AWSIOT/pizza-button
+> export STORE_ID=6936 && node test.js
+
+starting handler...
+Received event: { serialNumber: 'abc123',
+  batteryVoltage: '10mV',
+  clickType: 'SINGLE' }
+store ID: 6936
