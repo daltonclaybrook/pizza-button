@@ -1,6 +1,5 @@
 /**
- * This is a sample that connects Lambda with IFTTT Maker channel. The event is
- * sent in this format: <serialNumber>-<clickType>.
+ * This is an implementation of a pizza button using an AWS IoT Button
  *
  * The following JSON template shows what is sent as the payload:
 {
@@ -16,35 +15,43 @@
  * http://docs.aws.amazon.com/iot/latest/developerguide/iot-lambda-rule.html
  */
 
+/* 
+ * Environment Variables:
+ * TWILIO_SID
+ * TWILIO_TOKEN
+ * TWILIO_TO - e.g. +18558554587
+ * TWILIO_FROM - e.g. +18558554587
+ * 
+ * STORE_ID
+ * CUSTOMER_ID
+ * COUPON_CODE
+ * CC_NUMBER
+ * CC_SECURITY_CODE
+ * CC_EXPIRATION
+ * CC_ZIPCODE
+ */
+
 'use strict';
 
 const pizzapi = require('dominos');
-// const https = require('https');
 const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 
 exports.handler = (event, context, callback) => {
     console.log('Received event:', event);
-    const storeID = process.env.STORE_ID;
-    const customerID = process.env.CUSTOMER_ID;
-    const couponCode = process.env.COUPON_CODE;
-    const cardNumber = process.env.CC_NUMBER;
-    const securityCode = process.env.CC_SECURITY_CODE;
-    const phoneNumber = process.env.PHONE_NUMBER;
-
-    if (!storeID || !customerID || !couponCode || !cardNumber || !securityCode) {
-        return callback("must supply environment variables")
+    if (!validateEnvironmentVariables()) {
+        return callback("missing some environment variables");
     }
 
     const customer = createCustomer();
-    var order = createOrder(customer, storeID);
-    addItemsToOrder(order, couponCode);
+    var order = createOrder(customer);
+    addItemsToOrder(order);
 
     console.log('pricing order...');
     order.price((priceResult) => {
         console.log(`price result:\n${JSON.stringify(priceResult, null, 2)}`);
         if (priceResult.success) {
             // success
-            // addPaymentToOrder(order, cardNumber, securityCode);
+            addPaymentToOrder(order);
             // order.place((placeResult) => {
             //     console.log(`order result:\n${JSON.stringify(placeResult, null, 2)}`);
             //     if (placeResult.success) {
@@ -55,14 +62,30 @@ exports.handler = (event, context, callback) => {
             //         callback('an error occurred when placing the order');
             //     }
             // });
-            sendMessage(phoneNumber, 'Everything seems to be going well');
-            callback(null, 'everything seems to have worked');
+            sendMessage('Everything seems to be going well');
+            callback(null, priceResult);
         } else {
             // error
-            sendMessage(phoneNumber, 'Your pizza could not be ordered because pricing failed.');
-            callback('an error occurred when pricing the order');
+            sendMessage('Your pizza could not be ordered because pricing failed.');
+            callback(priceResult);
         }
     });
+
+    // Helper Functions
+
+    function validateEnvironmentVariables() {
+        const toPhone = process.env.TWILIO_TO;
+        const fromPhone = process.env.TWILIO_FROM;
+        const storeID = process.env.STORE_ID;
+        const customerID = process.env.CUSTOMER_ID;
+        const couponCode = process.env.COUPON_CODE;
+        const cardNumber = process.env.CC_NUMBER;
+        const securityCode = process.env.CC_SECURITY_CODE;
+        const cardExpiration = process.env.CC_EXPIRATION;
+        const cardZipcode = process.env.CC_ZIPCODE;
+        
+        return (toPhone && fromPhone && storeID && customerID && couponCode && cardNumber && securityCode && cardExpiration && cardZipcode)
+    }
 
     function createCustomer(customerID) {
         var customer = new pizzapi.Customer({
@@ -84,17 +107,17 @@ exports.handler = (event, context, callback) => {
         return customer;
     }
 
-    function createOrder(customer, storeID) {
+    function createOrder(customer) {
         var order = new pizzapi.Order({
             customer: customer,
-            storeID: storeID,
+            storeID: process.env.STORE_ID,
             deliveryMethod: 'Delivery'
         });
         delete order.OrderID;
         return order;
     }
 
-    function addItemsToOrder(order, couponCode) {
+    function addItemsToOrder(order) {
         //Dalton
         var daltonItem = new pizzapi.Item({
             code: '12SCREEN', // medium hand-tossed pizza
@@ -120,28 +143,29 @@ exports.handler = (event, context, callback) => {
 
         //Coupon
         var coupon = new pizzapi.Coupon({
-            code: couponCode
+            code: process.env.COUPON_CODE
         });
         
         delete coupon.isNew;
         order.addCoupon(coupon);
     }
 
-    function addPaymentToOrder(order, cardNumber, securityCode) {
+    function addPaymentToOrder(order) {
         var cardInfo = new order.PaymentObject();
+        const cardNumber = process.env.CC_NUMBER;
         cardInfo.Amount = order.Amounts.Customer;
         cardInfo.Number = cardNumber;
         cardInfo.CardType = order.validateCC(cardNumber);
-        cardInfo.Expiration = '0119';
-        cardInfo.SecurityCode = securityCode;
-        cardInfo.PostalCode = '75023';
+        cardInfo.Expiration = process.env.CC_EXPIRATION;
+        cardInfo.SecurityCode = process.env.CC_SECURITY_CODE;
+        cardInfo.PostalCode = process.env.CC_ZIPCODE;
         order.Payments.push(cardInfo);
     }
 
-    function sendMessage(phoneNumber, message) {
+    function sendMessage(message) {
         twilio.sendMessage({
-            to: phoneNumber,
-            from: '+18558554587',
+            to: process.env.TWILIO_TO,
+            from: process.env.TWILIO_FROM,
             body: message
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
             if (err) { 
