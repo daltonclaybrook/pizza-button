@@ -150,6 +150,14 @@ exports.handler = (event, context, callback) => {
         });
         order.addItem(lindseyItem);
 
+        //Cookie
+        var cookieItem = new pizzapi.Item({
+            code: 'MARBRWNE', // Domino's Marbled Cookie Brownie
+            options: [],
+            quantity: 1
+        });
+        order.addItem(cookieItem);
+
         //Coupon
         var coupon = new pizzapi.Coupon({
             code: process.env.COUPON_CODE

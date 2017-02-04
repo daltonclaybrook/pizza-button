@@ -5,7 +5,7 @@
     const event = {
         serialNumber: "abc123",
         batteryVoltage: "10mV",
-        clickType: "SINGLE"
+        clickType: "LONG"
     };
     console.log('starting handler...');
     index.handler(event, {}, (err, body) => {
