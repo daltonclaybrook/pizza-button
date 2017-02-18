@@ -44,11 +44,6 @@ exports.handler = (event, context, callback) => {
     }
 
     const clickType = event.clickType;
-    if (clickType != 'LONG') {
-        sendMessage('Hold the button for about two seconds to order a pizza.');
-        return callback(null, `button click type: ${clickType}. Use LONG to order a pizza.`);
-    } 
-
     const customer = createCustomer();
     var order = createOrder(customer);
     addItemsToOrder(order);
@@ -58,6 +53,12 @@ exports.handler = (event, context, callback) => {
         console.log(`price result:\n${JSON.stringify(priceResult, null, 2)}`);
         if (priceResult.success) {
             // success
+            const priceAmount = priceResult.result.Order.Amounts.Customer;
+            if (clickType != 'LONG') {
+                sendMessage(`Hold the button for about two seconds to order your pizza. Your total will be $${priceAmount}.`);
+                return callback(null, `button click type: ${clickType}. Use LONG to order a pizza.`);
+            }
+
             addPaymentToOrder(order);
             order.place((placeResult) => {
                 console.log(`order result:\n${JSON.stringify(placeResult, null, 2)}`);
