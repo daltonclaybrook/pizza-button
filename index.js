@@ -1,4 +1,5 @@
 /**
+ * Copyright © 2017 Dalton Claybrook. All rights reserved.
  * This is an implementation of a pizza button using an AWS IoT Button
  *
  * The following JSON template shows what is sent as the payload:
