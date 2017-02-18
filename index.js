@@ -102,13 +102,13 @@ exports.handler = (event, context, callback) => {
             firstName: 'Dalton',
             lastName: 'Claybrook',
             address: {
-                Street: "3725 MCKINLEY DR",
+                Street: "4700 W PARK BLVD",
 			    City: "PLANO",
                 Region: "TX",
-                PostalCode: "75023-7205",
-                Type: "House",
-                Name: "3725 MCKIN",
-                StreetName: "MCKINLEY DR"
+                PostalCode: "75093-2340",
+                Type: "Business",
+                OrganizationName: "Katy Trail Ice House Outpose",
+                StreetName: "W PARK BLVD"
             },
             email: 'daltonclaybrook@gmail.com',
             phone: '8066320911'
@@ -139,33 +139,13 @@ exports.handler = (event, context, callback) => {
         });
         order.addItem(daltonItem);
 
-        //Lindsey
-        var lindseyItem = new pizzapi.Item({
-            code: '12SCREEN', // medium hand-tossed pizza
-            options: [
-                'P', // pepperoni
-                'R', // black olives
-                'G' // green peppers
-            ],
-            quantity: 1
-        });
-        order.addItem(lindseyItem);
-
-        //Cookie
-        var cookieItem = new pizzapi.Item({
-            code: 'MARBRWNE', // Domino's Marbled Cookie Brownie
+        //Ranch
+        var ranchItem = new pizzapi.Item({
+            code: 'RANCH', // ranch
             options: [],
             quantity: 1
         });
-        order.addItem(cookieItem);
-
-        //Coupon
-        var coupon = new pizzapi.Coupon({
-            code: process.env.COUPON_CODE
-        });
-        
-        delete coupon.isNew;
-        order.addCoupon(coupon);
+        order.addItem(ranchItem);
     }
 
     function addPaymentToOrder(order) {
