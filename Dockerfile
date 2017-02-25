@@ -1,12 +1,15 @@
 FROM amazonlinux:latest
 
+ENV NVM_DIR /root/.nvm
+ENV NODE_VERSION 4.3.2
+ENV NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
+ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+# Install dependencies
 RUN yum -y update && \
     yum -y install zip && \
     yum -y install gcc-c++ make && \
     yum -y install findutils
-
-ENV NVM_DIR /root/.nvm
-ENV NODE_VERSION 4.3.2
 
 # Install nvm with node and npm
 RUN touch ~/.bash_profile && \
@@ -16,9 +19,7 @@ RUN touch ~/.bash_profile && \
     nvm alias default $NODE_VERSION && \
     nvm use default
 
-ENV NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
-ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
-
+# Install app dependencies and build archive
 WORKDIR /app
 COPY . .
 RUN rm -rf node_modules && \
